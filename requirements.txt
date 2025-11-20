@@ -4,5 +4,3 @@ dash-bootstrap-templates
 plotly
 pandas
 numpy
-matplotlib
-seaborn

@@ -21,8 +21,8 @@ Original file is located at
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+# import matplotlib.pyplot as plt
+# import seaborn as sns
 import os
 
 from dash import Dash, html, dcc, Input, Output, clientside_callback, callback
