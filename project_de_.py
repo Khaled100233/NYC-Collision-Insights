@@ -49,7 +49,7 @@ from dash_bootstrap_templates import load_figure_template
 # ---------------------------------------
 
 pd.set_option('display.max_columns', None)
-plt.style.use('seaborn-v0_8')
+# plt.style.use('seaborn-v0_8')
 
 print("Libraries loaded successfully.")
 
@@ -321,7 +321,7 @@ clientside_callback(
 # ---------------------------------------
 ### 6. Run Server
 # ---------------------------------------
-port = int(os.environ.get("PORT", 8080))
+port = int(os.environ.get("PORT", 8050))
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host = "0.0.0.0", port=port)
+    app.run_server(debug=False, host = "0.0.0.0", port=port)
