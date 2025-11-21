@@ -44,167 +44,7 @@ from dash_bootstrap_templates import load_figure_template
 #
 #print("=> Done installing dash requirements.")
 
-# ---------------------------------------
-### 2. Load/Prepare Data
-# ---------------------------------------
 
-pd.set_option('display.max_columns', None)
-# plt.style.use('seaborn-v0_8')
-
-print("Libraries loaded successfully.")
-
-"""### Load the Crashes"""
-
-crashes_url = "https://data.cityofnewyork.us/api/views/h9gi-nx95/rows.csv?accessType=DOWNLOAD"
-
-print("Loading crashes dataset")
-
-df_crashes = pd.read_csv(crashes_url, low_memory=False)
-
-print("Crashes dataset shape:", df_crashes.shape)
-df_crashes.head()
-
-"""### Load Persons (CHUNKED)"""
-
-persons_url = "https://data.cityofnewyork.us/api/views/f55k-p6yu/rows.csv?accessType=DOWNLOAD"
-
-# Only columns needed for integration
-useful_cols = [
-    "COLLISION_ID",
-    "PERSON_TYPE",
-    "PERSON_INJURY",
-    "PERSON_AGE",
-    "PERSON_SEX"
-]
-
-chunk_size = 200_000  # safe for free Colab
-persons_chunks = []
-
-print("Loading PERSONS dataset in chunks...")
-
-for chunk in pd.read_csv(persons_url, usecols=useful_cols, chunksize=chunk_size, low_memory=False):
-    persons_chunks.append(chunk)
-
-# Concatenate all chunks into one DataFrame
-df_persons = pd.concat(persons_chunks, ignore_index=True)
-
-print("Persons dataset loaded successfully.")
-print("Persons dataset shape:", df_persons.shape)
-df_persons.head()
-
-"""### Clean Column Names"""
-
-df_crashes.columns = df_crashes.columns.str.upper().str.replace(" ", "_")
-df_persons.columns = df_persons.columns.str.upper().str.replace(" ", "_")
-
-df_crashes.head()
-
-"""### Convert Date & Time Columns"""
-
-df_crashes["CRASH_DATE"] = pd.to_datetime(df_crashes["CRASH_DATE"], errors="coerce")
-df_crashes["CRASH_TIME"] = pd.to_datetime(df_crashes["CRASH_TIME"], format="%H:%M", errors="coerce").dt.time
-
-df_crashes["YEAR"] = df_crashes["CRASH_DATE"].dt.year
-df_crashes["MONTH"] = df_crashes["CRASH_DATE"].dt.month
-
-df_crashes.head()
-
-"""### **EDA**"""
-
-# plt.figure(figsize=(10,5))
-# df_crashes['YEAR'].value_counts().sort_index().plot(kind='bar')
-# plt.title("Crashes Per Year")
-# plt.xlabel("Year")
-# plt.ylabel("Count")
-# plt.show()
-
-# plt.figure(figsize=(8,5))
-# df_crashes['BOROUGH'].fillna('Unknown').value_counts().plot(kind='bar')
-# plt.title("Crashes by Borough")
-# plt.xlabel("Borough")
-# plt.ylabel("Count")
-# plt.show()
-
-"""### Pre-Integration Cleaning
-
-***Handle Missing Values***
-"""
-
-# Drop crashes with no location at all
-df_crashes = df_crashes[
-    ~(df_crashes["LATITUDE"].isna() & df_crashes["LONGITUDE"].isna())
-].copy()
-
-# Borough
-df_crashes["BOROUGH"] = df_crashes["BOROUGH"].fillna("Unknown")
-
-# Injury columns
-injury_cols = [c for c in df_crashes.columns if "INJURED" in c or "KILLED" in c]
-
-for col in injury_cols:
-    df_crashes[col] = pd.to_numeric(df_crashes[col], errors="coerce").fillna(0).astype("int16")
-
-"""***Remove Duplicates***"""
-
-before = df_crashes.shape[0]
-df_crashes = df_crashes.drop_duplicates(subset=["COLLISION_ID"])
-after = df_crashes.shape[0]
-
-print(f"Removed {before - after} duplicate rows.")
-
-"""### Integration
-
-*join crashes with persons using COLLISION_ID*
-"""
-
-# We use LEFT JOIN to Keep all crashes
-
-
-df_merged = df_crashes.merge(
-    df_persons,
-    on="COLLISION_ID",
-    how="left"
-)
-
-print("Merged dataset shape:", df_merged.shape)
-df_merged.head()
-
-"""### **Post-Integration Cleaning**"""
-
-df_merged["PERSON_TYPE"] = df_merged["PERSON_TYPE"].fillna("Unknown").str.title()
-df_merged["PERSON_INJURY"] = df_merged["PERSON_INJURY"].fillna("Unknown")
-df_merged["PERSON_SEX"] = df_merged["PERSON_SEX"].fillna("Unknown")
-df_merged["PERSON_AGE"] = df_merged["PERSON_AGE"].fillna(-1).astype("int16")  # -1 = missing age
-
-"""### Memory Optimization (Downcasting)"""
-
-# Downcasting numeric columns to reduce RAM usage
-# ---------------------------------------
-### 3. functions used by the app
-# ---------------------------------------
-
-def downcast_int(df):
-    for col in df.select_dtypes(include=["int", "int64"]).columns:
-        df[col] = pd.to_numeric(df[col], downcast="integer")
-    return df
-
-def downcast_float(df):
-    for col in df.select_dtypes(include=["float"]).columns:
-        df[col] = pd.to_numeric(df[col], downcast="float")
-    return df
-
-df_merged = downcast_int(df_merged)
-df_merged = downcast_float(df_merged)
-
-print("Memory optimization complete.")
-
-"""### Save Final Cleaned Dataset"""
-
-df_merged.to_csv("cleaned_nyc_crashes.csv", index=False)
-print("Final cleaned dataset saved as cleaned_nyc_crashes.csv")
-df_merged.head()
-
-df_merged.head()
 
 
 
@@ -217,6 +57,8 @@ df_merged.head()
 
 # Example: You already created df_merged before this script
 # Just make sure it exists in memory here
+
+df_merged = pd.read_csv("cleaned_nyc_crashes.csv", low_memory=True, chunksize=100000)
 
 # Filter rows that have valid coordinates (recommended)
 df_plot = df_merged[
@@ -231,7 +73,7 @@ if injury_column not in df_plot.columns:
 load_figure_template(["minty", "minty_dark"])
 
 # ---------------------------------------
-### 4. Build Dash App
+### 3. Build Dash App
 # ---------------------------------------
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.MINTY, dbc.icons.FONT_AWESOME])
@@ -269,7 +111,7 @@ app.layout = dbc.Container(
 )
 
 # ---------------------------------------
-### 5. Figure Callback
+### 4. Figure Callback
 # ---------------------------------------
 @callback(
     Output("graph", "figure"),
@@ -319,7 +161,7 @@ clientside_callback(
     Input("switch", "value"),
 )
 # ---------------------------------------
-### 6. Run Server
+### 5. Run Server
 # ---------------------------------------
 port = int(os.environ.get("PORT", 8050))
 
