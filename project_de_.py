@@ -58,7 +58,7 @@ from dash_bootstrap_templates import load_figure_template
 # Example: You already created df_merged before this script
 # Just make sure it exists in memory here
 
-df_merged = pd.read_csv("cleaned_nyc_crashes.csv", low_memory=True, chunksize=100000)
+df_merged = pd.read_csv("cleaned_nyc_crashes.csv", low_memory=True)
 
 # Filter rows that have valid coordinates (recommended)
 df_plot = df_merged[
