@@ -60,17 +60,17 @@ from dash_bootstrap_templates import load_figure_template
 
 df_merged = pd.read_csv("cleaned_nyc_crashes.csv", low_memory=True)
 
-# Filter rows that have valid coordinates (recommended)
-df_plot = df_merged[
-    ~(df_merged["LATITUDE"].isna() | df_merged["LONGITUDE"].isna())
-].copy()
+# # Filter rows that have valid coordinates (recommended)
+# df_plot = df_merged[
+#     ~(df_merged["LATITUDE"].isna() | df_merged["LONGITUDE"].isna())
+# ].copy()
 
 # If injury column exists (adjust if needed)
-injury_column = "NUMBER_OF_PERSONS_INJURED"
-if injury_column not in df_plot.columns:
-    raise ValueError(f"Column '{injury_column}' not found in df_merged!")
+# injury_column = "NUMBER_OF_PERSONS_INJURED"
+# if injury_column not in df_plot.columns:
+#     raise ValueError(f"Column '{injury_column}' not found in df_merged!")
 
-load_figure_template(["minty", "minty_dark"])
+# load_figure_template(["minty", "minty_dark"])
 
 # ---------------------------------------
 ### 3. Build Dash App
