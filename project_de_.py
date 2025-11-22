@@ -70,7 +70,7 @@ injury_column = "NUMBER_OF_PERSONS_INJURED"
 # if injury_column not in df_plot.columns:
 #     raise ValueError(f"Column '{injury_column}' not found in df_merged!")
 
-# load_figure_template(["minty", "minty_dark"])
+load_figure_template(["minty", "minty_dark"])
 
 # ---------------------------------------
 ### 3. Build Dash App
