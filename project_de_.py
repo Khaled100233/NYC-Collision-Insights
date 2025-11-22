@@ -66,7 +66,7 @@ df_plot = pd.read_csv("cleaned_nyc_crashes.csv", low_memory=True)
 # ].copy()
 
 # If injury column exists (adjust if needed)
-# injury_column = "NUMBER_OF_PERSONS_INJURED"
+injury_column = "NUMBER_OF_PERSONS_INJURED"
 # if injury_column not in df_plot.columns:
 #     raise ValueError(f"Column '{injury_column}' not found in df_merged!")
 
