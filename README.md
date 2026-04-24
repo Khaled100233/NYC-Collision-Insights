@@ -1,6 +1,6 @@
 # 🚗 NYC Collision Insights
 
-An interactive data engineering project that ingests, cleans, integrates, and visualises **NYC Motor Vehicle Collision** data sourced from [NYC Open Data](https://opendata.cityofnewyork.us/).
+An interactive data engineering project that ingests, cleans, integrates, and visualizes **NYC Motor Vehicle Collision** data sourced from [NYC Open Data](https://opendata.cityofnewyork.us/).
 
 ---
 
@@ -51,7 +51,7 @@ NYC-Collision-Insights/
 | Tool | Purpose |
 |------|---------|
 | Python 3 | Core language |
-| Pandas & NumPy | Data wrangling & memory optimisation |
+| Pandas & NumPy | Data wrangling & memory optimization |
 | Plotly Express | Chart rendering |
 | Dash + Dash Bootstrap Components | Web dashboard framework |
 | Git LFS | Large-file storage for the cleaned CSV |
